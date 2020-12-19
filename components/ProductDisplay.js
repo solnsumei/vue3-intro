@@ -1,4 +1,10 @@
 app.component('product-display', {
+  props: {
+    premium: {
+      type:  Boolean,
+      required: true,
+    }
+  },
   template: 
   /*html*/
   `<div class="product-display">
@@ -13,6 +19,7 @@ app.component('product-display', {
         <p v-if="inStock">In Stock</p>
         <p v-else>Out of Stock</p>
 
+        <p>Shipping: {{ shipping }}</p>
         <ul>
           <li v-for="detail in details">{{ detail }}</li>
         </ul>
@@ -24,7 +31,6 @@ app.component('product-display', {
           class="color-circle"
           :style="{ backgroundColor: variant.color }">
         </div>
-
         <button
           class="button"
           :class="{ disabledButton: !inStock }"
@@ -34,6 +40,8 @@ app.component('product-display', {
         </button>
       </div>
     </div>
+    <review-list :reviews="reviews" v-if="reviews.length"></review-list>
+    <review-form @review-submitted="addReview"></review-form>
   </div>`,
   data() {
     return {
@@ -44,15 +52,19 @@ app.component('product-display', {
       variants: [
         { id: 2234, color: 'green', image: './assets/images/socks_green.jpg', quantity: 50 },
         { id: 2235, color: 'blue', image: './assets/images/socks_blue.jpg', quantity: 0 },
-      ]
+      ],
+      reviews: []
     }
   },
   methods: {
     addToCart() {
-      this.cart += 1
+      this.$emit('add-to-cart', this.variants[this.selectedVariant].id)
     },
     updateVariant(index) {
       this.selectedVariant = index
+    },
+    addReview(productReview) {
+      this.reviews.push(productReview)
     }
   },
   computed: {
@@ -64,6 +76,10 @@ app.component('product-display', {
     },
     image() {
       return this.variants[this.selectedVariant].image
+    },
+    shipping() {
+      if (this.premium) return "Free"
+      return "$2.99"
     }
   }
 })
